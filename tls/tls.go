@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	net "github.com/deestarks/tinynet"
+	"github.com/deestarks/tinynet/net"
 )
 
 // Dial makes a TLS network connection. It tries to provide a mostly compatible interface
