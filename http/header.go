@@ -2,7 +2,7 @@ package http
 
 import (
 	"io"
-	"net/http/httptrace"
+	// "net/http/httptrace"
 	"net/textproto"
 	"sort"
 	"strings"
@@ -78,8 +78,8 @@ func (h Header) Write(w io.Writer) error {
 	return h.write(w, nil)
 }
 
-func (h Header) write(w io.Writer, trace *httptrace.ClientTrace) error {
-	return h.writeSubset(w, nil, trace)
+func (h Header) write(w io.Writer, trace interface{}) error {
+	return h.writeSubset(w, nil, nil)
 }
 
 // Clone returns a copy of h or nil if h is nil.
@@ -179,33 +179,33 @@ func (h Header) WriteSubset(w io.Writer, exclude map[string]bool) error {
 	return h.writeSubset(w, exclude, nil)
 }
 
-func (h Header) writeSubset(w io.Writer, exclude map[string]bool, trace *httptrace.ClientTrace) error {
-	ws, ok := w.(io.StringWriter)
-	if !ok {
-		ws = stringWriter{w}
-	}
-	kvs, sorter := h.sortedKeyValues(exclude)
-	var formattedVals []string
-	for _, kv := range kvs {
-		for _, v := range kv.values {
-			v = headerNewlineToSpace.Replace(v)
-			v = textproto.TrimString(v)
-			for _, s := range []string{kv.key, ": ", v, "\r\n"} {
-				if _, err := ws.WriteString(s); err != nil {
-					headerSorterPool.Put(sorter)
-					return err
-				}
-			}
-			if trace != nil && trace.WroteHeaderField != nil {
-				formattedVals = append(formattedVals, v)
-			}
-		}
-		if trace != nil && trace.WroteHeaderField != nil {
-			trace.WroteHeaderField(kv.key, formattedVals)
-			formattedVals = nil
-		}
-	}
-	headerSorterPool.Put(sorter)
+func (h Header) writeSubset(w io.Writer, exclude map[string]bool, trace interface{}) error {
+	// ws, ok := w.(io.StringWriter)
+	// if !ok {
+	// 	ws = stringWriter{w}
+	// }
+	// kvs, sorter := h.sortedKeyValues(exclude)
+	// var formattedVals []string
+	// for _, kv := range kvs {
+	// 	for _, v := range kv.values {
+	// 		v = headerNewlineToSpace.Replace(v)
+	// 		v = textproto.TrimString(v)
+	// 		for _, s := range []string{kv.key, ": ", v, "\r\n"} {
+	// 			if _, err := ws.WriteString(s); err != nil {
+	// 				headerSorterPool.Put(sorter)
+	// 				return err
+	// 			}
+	// 		}
+	// 		if trace != nil && trace.WroteHeaderField != nil {
+	// 			formattedVals = append(formattedVals, v)
+	// 		}
+	// 	}
+	// 	if trace != nil && trace.WroteHeaderField != nil {
+	// 		trace.WroteHeaderField(kv.key, formattedVals)
+	// 		formattedVals = nil
+	// 	}
+	// }
+	// headerSorterPool.Put(sorter)
 	return nil
 }
 
